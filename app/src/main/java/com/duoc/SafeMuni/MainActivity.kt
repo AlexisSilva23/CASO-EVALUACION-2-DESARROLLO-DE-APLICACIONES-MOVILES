@@ -3,51 +3,48 @@ package com.duoc.SafeMuni
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.*
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.sp
+import com.duoc.SafeMuni.ui.BarraNavegacionInferiorInicio
 import com.duoc.SafeMuni.ui.InicioScreen
 import com.duoc.SafeMuni.ui.MisReportesScreen
-// Si tu compañero ya creó NuevoReporteScreen, descomenta la siguiente línea:
-// import com.duoc.SafeMuni.ui.NuevoReporteScreen
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            // Estado global para controlar la pantalla y la pestaña activa de la barra inferior
+            // Estado global para gestionar la pantalla activa y el indicador azul de la barra inferior
             var pantallaActual by remember { mutableStateOf("Inicio") }
 
             when (pantallaActual) {
                 "Inicio" -> {
                     InicioScreen(
                         onNavegarA = { destino -> pantallaActual = destino },
-                        onRegistrarIncidenciaClick = {
-                            // Redirige directamente a la pantalla de "Nuevo reporte"
-                            pantallaActual = "Reportar"
-                        }
+                        onRegistrarIncidenciaClick = { pantallaActual = "Reportar" }
                     )
                 }
                 "Reportar" -> {
-                    // Cuando tu compañero suba su archivo NuevoReporteScreen.kt, desmarca el comentario de abajo.
-                    // NuevoReporteScreen(onNavegarA = { destino -> pantallaActual = destino })
-
-                    // Vista temporal mientras tu compañero sube la pantalla de "Nuevo reporte":
-                    VistaTemporalReportar(onNavegarA = { destino -> pantallaActual = destino })
+                    // Vista contenedora temporal con la barra inferior activa en "Reportar"
+                    // cuando tu compañero integre NuevoReporteScreen, solo reemplazas el centro de la pantalla
+                    PantallaContenedoraReportar(onNavegarA = { destino -> pantallaActual = destino })
                 }
                 "Mis casos" -> {
                     MisReportesScreen(
                         onNavegarA = { destino -> pantallaActual = destino },
                         onVerDetalleCaso = { folio ->
-                            // Acción para ver el detalle del caso
+                            // Acción para abrir el detalle del caso
                         }
                     )
                 }
                 "Perfil" -> {
-                    VistaTemporalPerfil(onNavegarA = { destino -> pantallaActual = destino })
+                    PantallaContenedoraPerfil(onNavegarA = { destino -> pantallaActual = destino })
                 }
             }
         }
@@ -55,15 +52,55 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-fun VistaTemporalReportar(onNavegarA: (String) -> Unit) {
-    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-        Text("Pantalla Nuevo Reporte (Integración en proceso)")
+fun PantallaContenedoraReportar(onNavegarA: (String) -> Unit) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color(0xFFF4F6F8))
+    ) {
+        Box(
+            modifier = Modifier
+                .weight(1f)
+                .fillMaxWidth(),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(
+                text = "Pantalla 'Nuevo reporte' (En desarrollo por compañero)",
+                fontSize = 16.sp,
+                fontWeight = FontWeight.Medium,
+                color = Color.Gray
+            )
+        }
+        BarraNavegacionInferiorInicio(
+            itemSeleccionado = "Reportar",
+            onNavegarA = onNavegarA
+        )
     }
 }
 
 @Composable
-fun VistaTemporalPerfil(onNavegarA: (String) -> Unit) {
-    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-        Text("Pantalla Perfil")
+fun PantallaContenedoraPerfil(onNavegarA: (String) -> Unit) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color(0xFFF4F6F8))
+    ) {
+        Box(
+            modifier = Modifier
+                .weight(1f)
+                .fillMaxWidth(),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(
+                text = "Pantalla Perfil",
+                fontSize = 16.sp,
+                fontWeight = FontWeight.Medium,
+                color = Color.Gray
+            )
+        }
+        BarraNavegacionInferiorInicio(
+            itemSeleccionado = "Perfil",
+            onNavegarA = onNavegarA
+        )
     }
 }
