@@ -4,6 +4,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
@@ -15,26 +16,39 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
-// Modelo local e independiente para esta pantalla
-data class CasoRecienteUI(
+data class CasoReporteUI(
     val id: String,
     val titulo: String,
     val sector: String,
     val fecha: String,
-    val estado: String // "En revisión", "En proceso", "Cerrado"
+    val estado: String
 )
 
 @Composable
-fun InicioScreen(
+fun MisReportesScreen(
     onNavegarA: (String) -> Unit = {},
-    onRegistrarIncidenciaClick: () -> Unit = {}
+    onVerDetalleCaso: (String) -> Unit = {}
 ) {
-    // Datos sintéticos precargados para la vista de prueba
-    val casosRecientes = remember {
+    var busqueda by remember { mutableStateOf("") }
+    var filtroSeleccionado by remember { mutableStateOf("Todos") }
+
+    val listaCasosPrueba = remember {
         listOf(
-            CasoRecienteUI("SM-001", "Poca iluminacion", "Sector referencial", "Hace 2 h", "En revisión"),
-            CasoRecienteUI("SM-002", "Vehículo abandonado", "Sector referencial", "Ayer", "En proceso")
+            CasoReporteUI("SM-001", "Iluminación deficiente", "Sector referencial", "hoy", "En revisión"),
+            CasoReporteUI("SM-002", "Vehículo abandonado", "Sector referencial", "Ayer, 18:10", "En proceso"),
+            CasoReporteUI("SM-003", "Ruido nocturno", "Sector referencial", "10 oct", "Cerrado")
         )
+    }
+
+    val casosFiltrados = listaCasosPrueba.filter { caso ->
+        val coincideTexto = caso.titulo.contains(busqueda, ignoreCase = true) ||
+                caso.sector.contains(busqueda, ignoreCase = true)
+        val coincideFiltro = when (filtroSeleccionado) {
+            "En revisión" -> caso.estado == "En revisión"
+            "Cerrados" -> caso.estado == "Cerrado"
+            else -> true
+        }
+        coincideTexto && coincideFiltro
     }
 
     Column(
@@ -42,7 +56,7 @@ fun InicioScreen(
             .fillMaxSize()
             .background(Color(0xFFF4F6F8))
     ) {
-        // 1. Encabezado Azul Superior (Hola, Vecino)
+        // Encabezado Azul
         Box(
             modifier = Modifier
                 .fillMaxWidth()
@@ -51,179 +65,126 @@ fun InicioScreen(
         ) {
             Column {
                 Text(
-                    text = "Hola, Vecino",
+                    text = "Mis reportes",
                     color = Color.White,
                     fontSize = 22.sp,
                     fontWeight = FontWeight.Bold
                 )
                 Text(
-                    text = "Rol: Persona",
+                    text = "Seguimiento de incidencias creadas",
                     color = Color.White.copy(alpha = 0.8f),
                     fontSize = 14.sp
                 )
             }
         }
 
-        // 2. Contenido Central Desplazable
-        LazyColumn(
+        Column(
             modifier = Modifier
                 .weight(1f)
                 .fillMaxWidth()
-                .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+                .padding(16.dp)
         ) {
-            // Tarjeta: "¿Qué ocurrió?"
-            item {
-                Card(
-                    colors = CardDefaults.cardColors(containerColor = Color(0xFFE8F1FF)),
-                    shape = RoundedCornerShape(16.dp),
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Column(modifier = Modifier.padding(16.dp)) {
-                        Text(
-                            text = "¿Qué ocurrió?",
-                            fontSize = 18.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = Color(0xFF0F4C81)
-                        )
-                        Spacer(modifier = Modifier.height(4.dp))
-                        Text(
-                            text = "Registra una situación de seguridad comunal.",
-                            fontSize = 13.sp,
-                            color = Color.Gray
-                        )
-                        Spacer(modifier = Modifier.height(14.dp))
-                        Button(
-                            onClick = onRegistrarIncidenciaClick,
-                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF2A7BF6)),
-                            shape = RoundedCornerShape(8.dp),
-                            modifier = Modifier.fillMaxWidth()
-                        ) {
-                            Text(
-                                text = "Registrar incidencia",
-                                color = Color.White,
-                                fontWeight = FontWeight.Bold
-                            )
-                        }
-                    }
-                }
-            }
-
-            // Sección: Mis reportes (Contadores)
-            item {
-                Column {
-                    Text(
-                        text = "Mis reportes",
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 16.sp,
-                        color = Color.Black
-                    )
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        ContadorCardItem(
-                            cantidad = "2",
-                            titulo = "En revisión",
-                            colorFondo = Color(0xFFFFF3E0),
-                            colorTexto = Color(0xFFE65100),
-                            modifier = Modifier.weight(1f)
-                        )
-                        ContadorCardItem(
-                            cantidad = "1",
-                            titulo = "En proceso",
-                            colorFondo = Color(0xFFE3F2FD),
-                            colorTexto = Color(0xFF1565C0),
-                            modifier = Modifier.weight(1f)
-                        )
-                        ContadorCardItem(
-                            cantidad = "3",
-                            titulo = "Cerrados",
-                            colorFondo = Color(0xFFE8F5E9),
-                            colorTexto = Color(0xFF2E7D32),
-                            modifier = Modifier.weight(1f)
-                        )
-                    }
-                }
-            }
-
-            // Sección: Casos recientes
-            item {
-                Text(
-                    text = "Casos recientes",
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 16.sp,
-                    color = Color.Black
+            // Buscador
+            Text(text = "Buscar", fontSize = 14.sp, fontWeight = FontWeight.Bold, color = Color.Black)
+            Spacer(modifier = Modifier.height(4.dp))
+            OutlinedTextField(
+                value = busqueda,
+                onValueChange = { busqueda = it },
+                placeholder = { Text("Buscar por título") },
+                modifier = Modifier.fillMaxWidth(),
+                singleLine = true,
+                shape = RoundedCornerShape(8.dp),
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedContainerColor = Color.White,
+                    unfocusedContainerColor = Color.White
                 )
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // Chips de Filtro
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                FilterChipItem(label = "Todos", isSelected = filtroSeleccionado == "Todos", onClick = { filtroSeleccionado = "Todos" })
+                FilterChipItem(label = "En revisión", isSelected = filtroSeleccionado == "En revisión", onClick = { filtroSeleccionado = "En revisión" })
+                FilterChipItem(label = "Cerrados", isSelected = filtroSeleccionado == "Cerrados", onClick = { filtroSeleccionado = "Cerrados" })
             }
 
-            // Items de casos recientes
-            items(casosRecientes.size) { index ->
-                val caso = casosRecientes[index]
-                TarjetaCasoRecienteItem(caso = caso)
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // Listado de Casos
+            if (casosFiltrados.isEmpty()) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(32.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(text = "No se encontraron reportes", color = Color.Gray)
+                }
+            } else {
+                LazyColumn(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                    items(casosFiltrados) { caso ->
+                        TarjetaReporteItem(
+                            caso = caso,
+                            onClick = { onVerDetalleCaso(caso.id) }
+                        )
+                    }
+                }
             }
         }
 
-        // 3. Barra de Navegación Inferior (Con "Inicio" Seleccionado)
-        BarraNavegacionInferiorInicio(
-            itemSeleccionado = "Inicio",
+        // Barra inferior
+        BarraNavegacionInferiorReportes(
+            itemSeleccionado = "Mis casos",
             onNavegarA = onNavegarA
         )
     }
 }
 
 @Composable
-fun ContadorCardItem(
-    cantidad: String,
-    titulo: String,
-    colorFondo: Color,
-    colorTexto: Color,
-    modifier: Modifier = Modifier
+fun FilterChipItem(
+    label: String,
+    isSelected: Boolean,
+    onClick: () -> Unit
 ) {
-    Card(
-        colors = CardDefaults.cardColors(containerColor = colorFondo),
-        shape = RoundedCornerShape(12.dp),
-        modifier = modifier
+    val backgroundColor = if (isSelected) Color(0xFFE8F1FF) else Color(0xFFF1F5F9)
+    val textColor = if (isSelected) Color(0xFF2A7BF6) else Color(0xFF64748B)
+
+    Surface(
+        color = backgroundColor,
+        shape = RoundedCornerShape(20.dp),
+        modifier = Modifier.clickable { onClick() }
     ) {
-        Column(modifier = Modifier.padding(12.dp)) {
-            Text(
-                text = cantidad,
-                fontSize = 22.sp,
-                fontWeight = FontWeight.Bold,
-                color = colorTexto
-            )
-            Spacer(modifier = Modifier.height(2.dp))
-            Text(
-                text = titulo,
-                fontSize = 11.sp,
-                color = colorTexto
-            )
-        }
+        Text(
+            text = label,
+            color = textColor,
+            fontSize = 12.sp,
+            fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
+            modifier = Modifier.padding(horizontal = 14.dp, vertical = 6.dp)
+        )
     }
 }
 
 @Composable
-fun TarjetaCasoRecienteItem(caso: CasoRecienteUI) {
+fun TarjetaReporteItem(
+    caso: CasoReporteUI,
+    onClick: () -> Unit
+) {
     Card(
         colors = CardDefaults.cardColors(containerColor = Color.White),
-        shape = RoundedCornerShape(12.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
-        modifier = Modifier.fillMaxWidth()
+        shape = RoundedCornerShape(10.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable { onClick() }
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
-            Text(
-                text = caso.titulo,
-                fontWeight = FontWeight.Bold,
-                fontSize = 16.sp,
-                color = Color(0xFF1E293B)
-            )
+            Text(text = caso.titulo, fontWeight = FontWeight.Bold, fontSize = 16.sp, color = Color(0xFF1E293B))
             Spacer(modifier = Modifier.height(2.dp))
-            Text(
-                text = "${caso.sector} · ${caso.fecha}",
-                fontSize = 13.sp,
-                color = Color.Gray
-            )
+            Text(text = "${caso.sector} · ${caso.fecha}", fontSize = 13.sp, color = Color.Gray)
             Spacer(modifier = Modifier.height(8.dp))
 
             val (badgeBg, badgeText) = when (caso.estado) {
@@ -232,10 +193,7 @@ fun TarjetaCasoRecienteItem(caso: CasoRecienteUI) {
                 else -> Color(0xFFE8F5E9) to Color(0xFF2E7D32)
             }
 
-            Surface(
-                color = badgeBg,
-                shape = RoundedCornerShape(12.dp)
-            ) {
+            Surface(color = badgeBg, shape = RoundedCornerShape(12.dp)) {
                 Text(
                     text = caso.estado,
                     color = badgeText,
@@ -249,7 +207,7 @@ fun TarjetaCasoRecienteItem(caso: CasoRecienteUI) {
 }
 
 @Composable
-fun BarraNavegacionInferiorInicio(
+fun BarraNavegacionInferiorReportes(
     itemSeleccionado: String,
     onNavegarA: (String) -> Unit
 ) {
@@ -265,32 +223,16 @@ fun BarraNavegacionInferiorInicio(
             horizontalArrangement = Arrangement.SpaceAround,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            ItemNavegacionInicio(
-                label = "Inicio",
-                isSelected = itemSeleccionado == "Inicio",
-                onClick = { onNavegarA("Inicio") }
-            )
-            ItemNavegacionInicio(
-                label = "Reportar",
-                isSelected = itemSeleccionado == "Reportar",
-                onClick = { onNavegarA("Reportar") }
-            )
-            ItemNavegacionInicio(
-                label = "Mis casos",
-                isSelected = itemSeleccionado == "Mis casos",
-                onClick = { onNavegarA("Mis casos") }
-            )
-            ItemNavegacionInicio(
-                label = "Perfil",
-                isSelected = itemSeleccionado == "Perfil",
-                onClick = { onNavegarA("Perfil") }
-            )
+            ItemNavegacionReportes(label = "Inicio", isSelected = itemSeleccionado == "Inicio", onClick = { onNavegarA("Inicio") })
+            ItemNavegacionReportes(label = "Reportar", isSelected = itemSeleccionado == "Reportar", onClick = { onNavegarA("Reportar") })
+            ItemNavegacionReportes(label = "Mis casos", isSelected = itemSeleccionado == "Mis casos", onClick = { onNavegarA("Mis casos") })
+            ItemNavegacionReportes(label = "Perfil", isSelected = itemSeleccionado == "Perfil", onClick = { onNavegarA("Perfil") })
         }
     }
 }
 
 @Composable
-fun ItemNavegacionInicio(
+fun ItemNavegacionReportes(
     label: String,
     isSelected: Boolean,
     onClick: () -> Unit
