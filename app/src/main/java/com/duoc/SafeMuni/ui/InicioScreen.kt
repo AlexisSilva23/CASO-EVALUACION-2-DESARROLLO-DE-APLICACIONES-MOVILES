@@ -27,7 +27,7 @@ data class CasoInicioUI(
 @Composable
 fun InicioScreen(
     onNavegarA: (String) -> Unit = {},
-    onRegistrarIncidenciaClick: () -> Unit = {}
+    onRegistrarIncidenciaClick: () -> Unit = { onNavegarA("Reportar") }
 ) {
     val casosRecientes = remember {
         listOf(
