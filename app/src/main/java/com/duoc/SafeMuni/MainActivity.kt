@@ -11,37 +11,24 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import com.duoc.SafeMuni.ui.Camara
+import com.duoc.SafeMuni.ui.NuevoReporte
 import com.duoc.SafeMuni.ui.theme.SafeMuniTheme
+import com.duoc.SafeMuni.viewmodel.NuevoReporteViewModel
 
 class MainActivity : ComponentActivity() {
+
+    private val viewModelReport = NuevoReporteViewModel()
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
             SafeMuniTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    Greeting(
-                        name = "Android",
-                        modifier = Modifier.padding(innerPadding)
-                    )
-                }
+                //NuevoReporte(viewModelReport)
+                Camara()
             }
         }
     }
 }
 
-@Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Text(
-        text = "Hello $name!",
-        modifier = modifier
-    )
-}
-
-@Preview(showBackground = true)
-@Composable
-fun GreetingPreview() {
-    SafeMuniTheme {
-        Greeting("Android")
-    }
-}
