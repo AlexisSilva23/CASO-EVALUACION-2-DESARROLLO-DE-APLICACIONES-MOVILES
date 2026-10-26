@@ -1,12 +1,22 @@
 package com.duoc.SafeMuni.model
 
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
+import android.net.Uri
 
-class NuevoReporteModel {
-    var categoriaReporte by mutableStateOf("")
-    var ubicacionReferencial by mutableStateOf("")
-    var descripcion by mutableStateOf("")
-    var evidencia by mutableStateOf("")
-}
+data class NuevoReporteModel (
+    val categoriaReporte: String = "",
+    val categoriasDisponibles : List<String> = listOf(
+        "Alumbrado Público",
+        "Basura / Limpieza",
+        "Seguridad / Incidencias",
+        "Vía Pública / Baches",
+        "Áreas Verdes",
+        "Otros"
+    ),
+    val ubicacion : String = "",
+    val latitud: Double? = null,
+    val longitud: Double? = null,
+    val descripcion : String = "",
+    val fotoUri : Uri? = null,
+    val mostrarModalExito: Boolean = false,
+    val mostrarMapaPicker: Boolean = false
+    )
