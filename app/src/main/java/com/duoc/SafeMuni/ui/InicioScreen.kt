@@ -27,7 +27,8 @@ data class CasoInicioUI(
 @Composable
 fun InicioScreen(
     onNavegarA: (String) -> Unit = {},
-    onRegistrarIncidenciaClick: () -> Unit = { onNavegarA("Reportar") }
+    onRegistrarIncidenciaClick: () -> Unit = { onNavegarA("Reportar") },
+    onVerDetalleCaso: (String) -> Unit = {}
 ) {
     val casosRecientes = remember {
         listOf(
@@ -140,7 +141,10 @@ fun InicioScreen(
             }
 
             items(casosRecientes) { caso ->
-                TarjetaCasoInicioItem(caso = caso)
+                TarjetaCasoInicioItem(
+                    caso = caso,
+                    onClick = { onVerDetalleCaso(caso.id) }
+                )
             }
         }
 
@@ -174,12 +178,17 @@ fun ContadorCard(
 }
 
 @Composable
-fun TarjetaCasoInicioItem(caso: CasoInicioUI) {
+fun TarjetaCasoInicioItem(
+    caso: CasoInicioUI,
+    onClick: () -> Unit = {}
+) {
     Card(
         colors = CardDefaults.cardColors(containerColor = Color.White),
         shape = RoundedCornerShape(12.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
-        modifier = Modifier.fillMaxWidth()
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable { onClick() }
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             Text(text = caso.titulo, fontWeight = FontWeight.Bold, fontSize = 16.sp, color = Color(0xFF1E293B))
