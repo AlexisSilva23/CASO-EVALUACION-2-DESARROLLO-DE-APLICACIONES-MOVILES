@@ -4,15 +4,15 @@ SafeMuni es una solución móvil nativa para el sistema operativo Android diseñ
 
 Funcionalidades del Sistema
 
-Modulo de Autenticación: Sistema de registro e inicio de sesión con verificación de credenciales y persistencia de datos local mediante Room Database.
+Módulo de Autenticación: Sistema de registro e inicio de sesión con verificación de credenciales y persistencia de datos local mediante Room Database.
 
 Módulo de Reportes: Formulario para el levantamiento de incidencias que integra lectura de posición mediante GPS, visualización en mapa y captura/adjunto de imágenes.
 
 Módulo de Monitoreo ("Mis Casos"): Interfaz de consulta de historial de reportes asociados al usuario, con capacidad de filtrado según el estado de la solicitud y vista detallada por folio.
 
-Módulo de Perfil: Panel de usuario que consolida la información de la cuenta, estadísticas directas de reportes creados/resueltos y opciones de sesión.
+Módulo de Perfil: Panel de usuario que consolida la información de la cuenta, estadísticas directas de reportes creados/resueltos y opciones de gestión de sesión.
 
-Navegación Declarativa: Flujo de pantallas gestionado por estados de Compose evitando acoplamiento de fragmentos tradicionales.
+Navegación Declarativa: Flujo de pantallas gestionado por estados de Compose evitando el acoplamiento de fragmentos tradicionales.
 
 Pila Tecnológica
 
