@@ -37,8 +37,7 @@ class MainActivity : ComponentActivity() {
                         LoginScreen(
                             viewModel = authViewModel,
                             onLoginExitoso = { pantallaActual = "Inicio" },
-                            onAbrirRegistro = { pantallaActual = "Registro" }
-                        )
+                        ) { pantallaActual = "Registro" }
                     }
                     "Registro" -> {
                         RegistroScreen(
