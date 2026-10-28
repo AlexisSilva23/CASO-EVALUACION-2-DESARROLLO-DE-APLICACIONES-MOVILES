@@ -1,6 +1,8 @@
 package com.duoc.SafeMuni.ui
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
@@ -11,6 +13,7 @@ import androidx.compose.material.icons.automirrored.filled.ExitToApp
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -29,39 +32,72 @@ fun PerfilScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Perfil de Usuario", fontWeight = FontWeight.Bold) },
+                title = {
+                    Column {
+                        Text(
+                            text = "Perfil de Usuario",
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 18.sp
+                        )
+                        Text(
+                            text = "SafeMuni - Seguridad Ciudadana",
+                            fontSize = 12.sp,
+                            color = Color.White.copy(alpha = 0.8f)
+                        )
+                    }
+                },
+                actions = {
+                    IconButton(onClick = { }) {
+                        Icon(
+                            imageVector = Icons.Default.AccountCircle,
+                            contentDescription = "Cuenta",
+                            tint = Color.White
+                        )
+                    }
+                },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = Color(0xFF0D47A1), // Azul institucional
-                    titleContentColor = Color.White
+                    containerColor = Color(0xFF0D47A1),
+                    titleContentColor = Color.White,
+                    actionIconContentColor = Color.White
                 )
             )
         },
         bottomBar = {
-            NavigationBar(containerColor = Color.White) {
-                NavigationBarItem(
-                    selected = false,
-                    onClick = { onNavegarA("Inicio") },
-                    icon = { Icon(Icons.Default.Home, contentDescription = "Inicio") },
-                    label = { Text("Inicio") }
-                )
-                NavigationBarItem(
-                    selected = false,
-                    onClick = { onNavegarA("Reportar") },
-                    icon = { Icon(Icons.Default.AddCircle, contentDescription = "Reportar") },
-                    label = { Text("Reportar") }
-                )
-                NavigationBarItem(
-                    selected = false,
-                    onClick = { onNavegarA("Mis casos") },
-                    icon = { Icon(Icons.Default.List, contentDescription = "Mis casos") },
-                    label = { Text("Mis casos") }
-                )
-                NavigationBarItem(
-                    selected = true,
-                    onClick = { },
-                    icon = { Icon(Icons.Default.Person, contentDescription = "Perfil") },
-                    label = { Text("Perfil") }
-                )
+            Surface(
+                color = Color.White,
+                shadowElevation = 8.dp
+            ) {
+                Column {
+                    HorizontalDivider(color = Color(0xFFE2E8F0), thickness = 1.dp)
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(65.dp),
+                        horizontalArrangement = Arrangement.SpaceAround,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        BarraItemPersonalizada(
+                            label = "Inicio",
+                            isSelected = false,
+                            onClick = { onNavegarA("Inicio") }
+                        )
+                        BarraItemPersonalizada(
+                            label = "Reportar",
+                            isSelected = false,
+                            onClick = { onNavegarA("Reportar") }
+                        )
+                        BarraItemPersonalizada(
+                            label = "Mis casos",
+                            isSelected = false,
+                            onClick = { onNavegarA("Mis casos") }
+                        )
+                        BarraItemPersonalizada(
+                            label = "Perfil",
+                            isSelected = true,
+                            onClick = { }
+                        )
+                    }
+                }
             }
         }
     ) { innerPadding ->
@@ -220,6 +256,43 @@ fun PerfilScreen(
                 )
             }
         }
+    }
+}
+
+@Composable
+private fun BarraItemPersonalizada(
+    label: String,
+    isSelected: Boolean,
+    onClick: () -> Unit
+) {
+    val colorActivo = Color(0xFF2563EB)
+    val colorInactivoCirculo = Color(0xFFCBD5E1)
+    val colorInactivoTexto = Color(0xFF64748B)
+
+    Column(
+        modifier = Modifier
+            .clickable(
+                interactionSource = remember { MutableInteractionSource() },
+                indication = null,
+                onClick = onClick
+            )
+            .padding(horizontal = 12.dp, vertical = 6.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        Box(
+            modifier = Modifier
+                .size(18.dp)
+                .clip(CircleShape)
+                .background(if (isSelected) colorActivo else colorInactivoCirculo)
+        )
+        Spacer(modifier = Modifier.height(6.dp))
+        Text(
+            text = label,
+            fontSize = 12.sp,
+            fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
+            color = if (isSelected) colorActivo else colorInactivoTexto
+        )
     }
 }
 
