@@ -1,35 +1,18 @@
 package com.duoc.SafeMuni.repository
 
 import android.content.Context
-import android.net.Uri
-import androidx.core.content.FileProvider
 import com.duoc.SafeMuni.model.Reporte
-import java.io.File
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.withContext
 
 class NuevoReporteRepository(
     private val context: Context,
     private val reporteDao: ReporteDao
 ) {
-    fun crearUriFotoTemporal(): Uri? {
-        return try {
-            val file = File.createTempFile("evidencia_", ".jpg", context.cacheDir)
-            file.deleteOnExit()
-            FileProvider.getUriForFile(
-                context,
-                "${context.packageName}.provider",
-                file
-            )
-        } catch (e: Exception) {
-            e.printStackTrace()
-            null
-        }
-    }
+    fun obtenerReportes(): Flow<List<Reporte>> = reporteDao.obtenerTodos()
 
-    suspend fun guardarReporte(reporte: Reporte) {
+    suspend fun guardarReporte(reporte: Reporte): Long = withContext(Dispatchers.IO) {
         reporteDao.insertar(reporte)
-    }
-
-    suspend fun obtenerReportes(): List<Reporte> {
-        return reporteDao.obtenerTodos()
     }
 }

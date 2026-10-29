@@ -1,28 +1,13 @@
 package com.duoc.SafeMuni.ui
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -31,201 +16,138 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.duoc.SafeMuni.model.Usuario
 import com.duoc.SafeMuni.viewmodel.AuthViewModel
 
 @Composable
 fun RegistroScreen(
-    viewModel: AuthViewModel,
-    onVolverLogin: () -> Unit
+    authViewModel: AuthViewModel,
+    onRegistroSuccess: () -> Unit,
+    onNavigateToLogin: () -> Unit
 ) {
-    Column(
+    var nombre by remember { mutableStateOf("") }
+    var apellido by remember { mutableStateOf("") }
+    var usuario by remember { mutableStateOf("") }
+    var correo by remember { mutableStateOf("") }
+    var password by remember { mutableStateOf("") }
+
+    val errorMensaje by authViewModel.mensajeError.collectAsState()
+
+    Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color(0xFFF4F6F8))
-            .verticalScroll(rememberScrollState())
-            .padding(24.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
+            .background(Color(0xFFF4F6F8)),
+        contentAlignment = Alignment.Center
     ) {
-
-        Box(
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            IconButton(
-                onClick = onVolverLogin,
-                modifier = Modifier.align(Alignment.CenterStart)
-            ) {
-                Icon(
-                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                    contentDescription = "Volver al inicio de sesión",
-                    tint = Color(0xFF1E293B)
-                )
-            }
-        }
-
-        Text(
-            text = "Crear cuenta",
-            fontSize = 24.sp,
-            fontWeight = FontWeight.Bold,
-            color = Color(0xFF1E293B),
-            modifier = Modifier.fillMaxWidth()
-        )
-
-        Text(
-            text = "Completa tus datos para registrarte en SafeMuni.",
-            fontSize = 13.sp,
-            color = Color.Gray,
-            modifier = Modifier.fillMaxWidth()
-        )
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        OutlinedTextField(
-            value = viewModel.nombreReg,
-            onValueChange = {
-                viewModel.nombreReg = it
-                viewModel.limpiarMensajes()
-            },
-            label = {
-                Text("Nombre")
-            },
-            singleLine = true,
-            modifier = Modifier.fillMaxWidth()
-        )
-
-        Spacer(modifier = Modifier.height(8.dp))
-
-        OutlinedTextField(
-            value = viewModel.apellidoReg,
-            onValueChange = {
-                viewModel.apellidoReg = it
-                viewModel.limpiarMensajes()
-            },
-            label = {
-                Text("Apellido")
-            },
-            singleLine = true,
-            modifier = Modifier.fillMaxWidth()
-        )
-
-        Spacer(modifier = Modifier.height(8.dp))
-
-        OutlinedTextField(
-            value = viewModel.correoReg,
-            onValueChange = {
-                viewModel.correoReg = it
-                viewModel.limpiarMensajes()
-            },
-            label = {
-                Text("Correo electrónico")
-            },
-            singleLine = true,
-            keyboardOptions = KeyboardOptions(
-                keyboardType = KeyboardType.Email
-            ),
-            modifier = Modifier.fillMaxWidth()
-        )
-
-        Spacer(modifier = Modifier.height(8.dp))
-
-        OutlinedTextField(
-            value = viewModel.usuarioReg,
-            onValueChange = {
-                viewModel.usuarioReg = it
-                viewModel.limpiarMensajes()
-            },
-            label = {
-                Text("Usuario")
-            },
-            singleLine = true,
-            modifier = Modifier.fillMaxWidth()
-        )
-
-        Spacer(modifier = Modifier.height(8.dp))
-
-        OutlinedTextField(
-            value = viewModel.passwordReg,
-            onValueChange = {
-                viewModel.passwordReg = it
-                viewModel.limpiarMensajes()
-            },
-            label = {
-                Text("Contraseña")
-            },
-            singleLine = true,
-            visualTransformation = PasswordVisualTransformation(),
-            keyboardOptions = KeyboardOptions(
-                keyboardType = KeyboardType.Password
-            ),
-            modifier = Modifier.fillMaxWidth()
-        )
-
-        Spacer(modifier = Modifier.height(8.dp))
-
-        OutlinedTextField(
-            value = viewModel.confirmarPasswordReg,
-            onValueChange = {
-                viewModel.confirmarPasswordReg = it
-                viewModel.limpiarMensajes()
-            },
-            label = {
-                Text("Confirmar contraseña")
-            },
-            singleLine = true,
-            visualTransformation = PasswordVisualTransformation(),
-            keyboardOptions = KeyboardOptions(
-                keyboardType = KeyboardType.Password
-            ),
-            modifier = Modifier.fillMaxWidth()
-        )
-
-        Spacer(modifier = Modifier.height(20.dp))
-
-        Button(
-            onClick = {
-                viewModel.registrarUsuario(onVolverLogin)
-            },
-            colors = ButtonDefaults.buttonColors(
-                containerColor = Color(0xFF2A7BF6)
-            ),
-            shape = RoundedCornerShape(8.dp),
+        Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(48.dp)
+                .padding(24.dp)
+                .verticalScroll(rememberScrollState()),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(10.dp)
         ) {
             Text(
-                text = "CREAR CUENTA",
+                text = "Registro de Usuario",
+                fontSize = 24.sp,
                 fontWeight = FontWeight.Bold,
-                color = Color.White
-            )
-        }
-
-        if (viewModel.mensajeError.isNotEmpty()) {
-
-            Spacer(modifier = Modifier.height(12.dp))
-
-            Surface(
-                color = Color(0xFFFFEBEE),
-                shape = RoundedCornerShape(8.dp),
+                color = Color(0xFF1E293B),
                 modifier = Modifier.fillMaxWidth()
+            )
+
+            Text(
+                text = "Crea una cuenta para reportar incidencias",
+                fontSize = 14.sp,
+                color = Color(0xFF64748B),
+                modifier = Modifier.fillMaxWidth()
+            )
+
+            Spacer(modifier = Modifier.height(4.dp))
+
+            CampoRegistro(label = "Nombre", value = nombre, placeholder = "Ingresa tu nombre") { nombre = it; authViewModel.limpiarError() }
+            CampoRegistro(label = "Apellido", value = apellido, placeholder = "Ingresa tu apellido") { apellido = it; authViewModel.limpiarError() }
+            CampoRegistro(label = "Usuario", value = usuario, placeholder = "Nombre de usuario") { usuario = it; authViewModel.limpiarError() }
+            CampoRegistro(label = "Correo Electrónico", value = correo, placeholder = "correo@ejemplo.com", keyboardType = KeyboardType.Email) { correo = it; authViewModel.limpiarError() }
+            CampoRegistro(label = "Contraseña", value = password, placeholder = "••••••••", isPassword = true) { password = it; authViewModel.limpiarError() }
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            Button(
+                onClick = {
+                    if (nombre.isNotBlank() && usuario.isNotBlank() && password.isNotBlank()) {
+                        val nuevoUsuario = Usuario(
+                            nombre = nombre,
+                            apellido = apellido,
+                            usuario = usuario,
+                            correo = correo,
+                            password = password
+                        )
+                        authViewModel.registrar(nuevoUsuario, onSuccess = onRegistroSuccess)
+                    }
+                },
+                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF2A7BF6)),
+                shape = RoundedCornerShape(8.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(48.dp)
             ) {
+                Text("REGISTRARSE", fontWeight = FontWeight.Bold, color = Color.White, fontSize = 15.sp)
+            }
+
+            if (errorMensaje != null) {
+                Surface(
+                    color = Color(0xFFFEE2E2),
+                    shape = RoundedCornerShape(8.dp),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Column(modifier = Modifier.padding(12.dp)) {
+                        Text("Error de registro", fontWeight = FontWeight.Bold, color = Color(0xFF991B1B), fontSize = 13.sp)
+                        Text(errorMensaje ?: "", color = Color(0xFFB91C1C), fontSize = 12.sp)
+                    }
+                }
+            }
+
+            TextButton(onClick = onNavigateToLogin) {
                 Text(
-                    text = viewModel.mensajeError,
-                    color = Color(0xFFC62828),
-                    fontSize = 13.sp,
-                    modifier = Modifier.padding(12.dp)
+                    "¿Ya tienes cuenta? Inicia sesión",
+                    color = Color(0xFF2A7BF6),
+                    fontWeight = FontWeight.SemiBold,
+                    fontSize = 14.sp
                 )
             }
         }
+    }
+}
 
-        Spacer(modifier = Modifier.height(16.dp))
-
-        Text(
-            text = "¿Ya tienes cuenta? Iniciar sesión",
-            color = Color(0xFF2A7BF6),
-            fontWeight = FontWeight.Bold,
-            modifier = Modifier.clickable {
-                onVolverLogin()
-            }
+@Composable
+private fun CampoRegistro(
+    label: String,
+    value: String,
+    placeholder: String,
+    isPassword: Boolean = false,
+    keyboardType: KeyboardType = KeyboardType.Text,
+    onValueChange: (String) -> Unit
+) {
+    Column(modifier = Modifier.fillMaxWidth()) {
+        Text(label, fontSize = 13.sp, fontWeight = FontWeight.SemiBold, color = Color(0xFF1E293B))
+        Spacer(modifier = Modifier.height(2.dp))
+        OutlinedTextField(
+            value = value,
+            onValueChange = onValueChange,
+            placeholder = { Text(placeholder, color = Color(0xFF94A3B8)) },
+            visualTransformation = if (isPassword) PasswordVisualTransformation() else androidx.compose.ui.text.input.VisualTransformation.None,
+            keyboardOptions = KeyboardOptions(keyboardType = keyboardType),
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(8.dp),
+            colors = OutlinedTextFieldDefaults.colors(
+                focusedContainerColor = Color.White,
+                unfocusedContainerColor = Color.White,
+                focusedBorderColor = Color(0xFF2A7BF6),
+                unfocusedBorderColor = Color(0xFFCBD5E1),
+                focusedTextColor = Color(0xFF1E293B),
+                unfocusedTextColor = Color(0xFF1E293B)
+            ),
+            singleLine = true
         )
     }
 }

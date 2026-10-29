@@ -8,12 +8,13 @@ import com.duoc.SafeMuni.model.Usuario
 
 @Dao
 interface UsuarioDao {
+
     @Query("SELECT * FROM usuarios WHERE usuario = :user AND password = :pass LIMIT 1")
-    suspend fun validarUsuario(user: String, pass: String): Usuario?
+    fun validarUsuario(user: String, pass: String): Usuario?
 
     @Insert(onConflict = OnConflictStrategy.ABORT)
-    suspend fun registrarUsuario(usuario: Usuario): Long
+    fun registrarUsuario(usuario: Usuario): Long
 
     @Query("SELECT * FROM usuarios WHERE usuario = :user OR correo = :correo LIMIT 1")
-    suspend fun buscarPorUsuarioOCorreo(user: String, correo: String): Usuario?
+    fun buscarPorUsuarioOCorreo(user: String, correo: String): Usuario?
 }

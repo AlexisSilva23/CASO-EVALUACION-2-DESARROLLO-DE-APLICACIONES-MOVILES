@@ -1,14 +1,19 @@
-package com.duoc.SafeMuni.model
+package com.duoc.SafeMuni.repository
 
 import android.content.Context
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
-import com.duoc.SafeMuni.repository.ReporteDao
-import com.duoc.SafeMuni.repository.UsuarioDao
+import com.duoc.SafeMuni.model.Reporte
+import com.duoc.SafeMuni.model.Usuario
 
-@Database(entities = [Usuario::class, Reporte::class], version = 1, exportSchema = false)
+@Database(
+    entities = [Usuario::class, Reporte::class],
+    version = 2, // Se incrementa la versión
+    exportSchema = false
+)
 abstract class AppDatabase : RoomDatabase() {
+
     abstract fun usuarioDao(): UsuarioDao
     abstract fun reporteDao(): ReporteDao
 
@@ -23,7 +28,7 @@ abstract class AppDatabase : RoomDatabase() {
                     AppDatabase::class.java,
                     "safemuni_database"
                 )
-                    .fallbackToDestructiveMigration() // EVITA QUE LA APP SE CIERRE AL ABRIR
+                    .fallbackToDestructiveMigration() // <--- Evita que la app se cierre si cambia la BD
                     .build()
                 INSTANCE = instance
                 instance

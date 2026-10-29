@@ -1,3 +1,12 @@
+import java.util.Properties
+
+// Cargar propiedades desde local.properties
+val localProperties = Properties()
+val localPropertiesFile = rootProject.file("local.properties")
+if (localPropertiesFile.exists()) {
+    localProperties.load(localPropertiesFile.inputStream())
+}
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
@@ -5,9 +14,9 @@ plugins {
 }
 
 // Configuración de KSP para generar código Kotlin nativo en Room y evitar errores de firmas Java
-ksp {
-    arg("room.generateKotlin", "true")
-}
+//ksp {
+ //   arg("room.generateKotlin", "true")
+//}
 
 android {
     namespace = "com.duoc.SafeMuni"
@@ -21,6 +30,9 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+        // Inyecta la variable MAPS_API_KEY desde local.properties hacia el AndroidManifest.xml
+        manifestPlaceholders["MAPS_API_KEY"] = localProperties.getProperty("MAPS_API_KEY") ?: ""
     }
 
     buildTypes {

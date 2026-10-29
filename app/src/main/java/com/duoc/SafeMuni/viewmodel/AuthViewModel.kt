@@ -1,91 +1,76 @@
 package com.duoc.SafeMuni.viewmodel
 
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.duoc.SafeMuni.model.Usuario
+import com.duoc.SafeMuni.repository.SessionManager
 import com.duoc.SafeMuni.repository.UsuarioRepository
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
-class AuthViewModel(private val repository: UsuarioRepository) : ViewModel() {
+class AuthViewModel(
+    private val usuarioRepository: UsuarioRepository,
+    private val sessionManager: SessionManager
+) : ViewModel() {
 
-    var usuarioInput by mutableStateOf("")
-    var passwordInput by mutableStateOf("")
+    private val _usuarioLogueado = MutableStateFlow<Usuario?>(null)
+    val usuarioLogueado: StateFlow<Usuario?> = _usuarioLogueado
 
-    var nombreReg by mutableStateOf("")
-    var apellidoReg by mutableStateOf("")
-    var correoReg by mutableStateOf("")
-    var usuarioReg by mutableStateOf("")
-    var passwordReg by mutableStateOf("")
-    var confirmarPasswordReg by mutableStateOf("")
+    private val _mensajeError = MutableStateFlow<String?>(null)
+    val mensajeError: StateFlow<String?> = _mensajeError
 
-    var mensajeError by mutableStateOf("")
-    var mensajeExito by mutableStateOf("")
-
-    fun limpiarMensajes() {
-        mensajeError = ""
-        mensajeExito = ""
+    init {
+        comprobarSesionGuardada()
     }
 
-    fun iniciarSesion(onExito: () -> Unit) {
-        limpiarMensajes()
-        if (usuarioInput.isBlank() || passwordInput.isBlank()) {
-            mensajeError = "Debes ingresar usuario y contraseña."
-            return
+    private fun comprobarSesionGuardada() {
+        val usuarioGuardado = sessionManager.obtenerUsuarioGuardado()
+        if (usuarioGuardado != null) {
+            _usuarioLogueado.value = usuarioGuardado
         }
+    }
 
+    fun login(user: String, pass: String, onSuccess: () -> Unit) {
         viewModelScope.launch {
-            val esValido = repository.validar(usuarioInput, passwordInput) || usuarioInput.lowercase() == "demo"
-            if (esValido) {
-                mensajeExito = "Inicio de sesión correcto."
-                onExito()
+            val usuario = usuarioRepository.validarUsuario(user, pass)
+            if (usuario != null) {
+                _usuarioLogueado.value = usuario
+                sessionManager.guardarSesion(usuario)
+                _mensajeError.value = null
+                onSuccess()
             } else {
-                mensajeError = "Credenciales o perfil no válido. Reintentar."
+                _mensajeError.value = "Usuario o contraseña incorrectos"
             }
         }
     }
 
-    fun registrarUsuario(onExito: () -> Unit) {
-        limpiarMensajes()
-        if (nombreReg.isBlank() || apellidoReg.isBlank() || correoReg.isBlank() ||
-            usuarioReg.isBlank() || passwordReg.isBlank() || confirmarPasswordReg.isBlank()
-        ) {
-            mensajeError = "Debes completar todos los campos."
-            return
-        }
-
-        if (!android.util.Patterns.EMAIL_ADDRESS.matcher(correoReg.trim()).matches()) {
-            mensajeError = "Ingresa un correo electrónico válido."
-            return
-        }
-
-        if (passwordReg.length < 6) {
-            mensajeError = "La contraseña debe tener al menos 6 caracteres."
-            return
-        }
-
-        if (passwordReg != confirmarPasswordReg) {
-            mensajeError = "Las contraseñas no coinciden."
-            return
-        }
-
+    fun registrar(usuario: Usuario, onSuccess: () -> Unit) {
         viewModelScope.launch {
-            val nuevoUsuario = Usuario(
-                nombre = nombreReg.trim(),
-                apellido = apellidoReg.trim(),
-                correo = correoReg.trim().lowercase(),
-                usuario = usuarioReg.trim().lowercase(),
-                password = passwordReg
-            )
-            val guardado = repository.registrar(nuevoUsuario)
-            if (guardado) {
-                mensajeExito = "Cuenta creada correctamente."
-                onExito()
+            val existente = usuarioRepository.buscarPorUsuarioOCorreo(usuario.usuario, usuario.correo)
+            if (existente != null) {
+                _mensajeError.value = "El usuario o correo ya está registrado"
             } else {
-                mensajeError = "El usuario o correo ya está registrado."
+                val id = usuarioRepository.registrarUsuario(usuario)
+                if (id > 0) {
+                    val usuarioConId = usuario.copy(id = id.toInt())
+                    _usuarioLogueado.value = usuarioConId
+                    sessionManager.guardarSesion(usuarioConId)
+                    _mensajeError.value = null
+                    onSuccess()
+                } else {
+                    _mensajeError.value = "Error al registrar usuario"
+                }
             }
         }
+    }
+
+    fun logout() {
+        sessionManager.cerrarSesion()
+        _usuarioLogueado.value = null
+    }
+
+    fun limpiarError() {
+        _mensajeError.value = null
     }
 }

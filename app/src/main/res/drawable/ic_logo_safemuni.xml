@@ -1,0 +1,27 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+
+    <!-- Fondo del icono -->
+    <path
+        android:pathData="M 18,0 L 90,0 A 18,18 0 0 1 108,18 L 108,90 A 18,18 0 0 1 90,108 L 18,108 A 18,18 0 0 1 0,90 L 0,18 A 18,18 0 0 1 18,0 Z"
+        android:fillColor="#0E5A77"/>
+
+    <!-- Borde del escudo -->
+    <path
+        android:pathData="M 54,20 C 70,20 82,25 82,25 C 82,58 70,78 54,88 C 38,78 26,58 26,25 C 26,25 38,20 54,20 Z"
+        android:fillColor="#083B52"
+        android:strokeColor="#D4AF37"
+        android:strokeWidth="3"/>
+
+    <!-- Check interior -->
+    <path
+        android:pathData="M 40,52 L 49,61 L 68,40"
+        android:fillColor="#00000000"
+        android:strokeColor="#22C55E"
+        android:strokeWidth="6"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round"/>
+</vector>

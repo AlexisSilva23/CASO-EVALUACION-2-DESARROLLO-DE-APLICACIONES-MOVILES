@@ -20,35 +20,45 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
+// Modelo ajustado con campos adicionales opcionales
 data class CasoReporteUI(
     val id: String,
     val titulo: String,
     val sector: String,
     val fecha: String,
-    val estado: String
+    val estado: String,
+    val categoria: String = "",
+    val descripcion: String = "",
+    val fotoUri: String? = null
 )
 
 @Composable
 fun MisReportesScreen(
+    reportesNuevos: List<CasoReporteUI> = emptyList(),
     onNavegarA: (String) -> Unit = {},
-    onVerDetalleCaso: (String) -> Unit = {}
+    onVerDetalle: (String) -> Unit = {},
+    onVerDetalleCaso: (String) -> Unit = onVerDetalle
 ) {
     var busqueda by remember { mutableStateOf("") }
     var filtroSeleccionado by remember { mutableStateOf("Todos") }
 
     val listaCasosPrueba = remember {
         listOf(
-            CasoReporteUI("SM-001", "Iluminación deficiente", "Sector referencial", "hoy", "En revisión"),
-            CasoReporteUI("SM-002", "Vehículo abandonado", "Sector referencial", "Ayer, 18:10", "En proceso"),
-            CasoReporteUI("SM-003", "Ruido nocturno", "Sector referencial", "10 oct", "Cerrado")
+            CasoReporteUI("SM-001", "Iluminación deficiente", "Sector referencial", "Hoy", "En revisión", "Alumbrado / entorno", "poca iluminacion en san joaquin por la noche."),
+            CasoReporteUI("SM-002", "Vehículo abandonado", "Sector referencial", "Ayer, 18:10", "En proceso", "Vehículos / Tránsito", "Vehículo abandonado por varios días."),
+            CasoReporteUI("SM-003", "Ruido nocturno", "Sector referencial", "10 oct", "Cerrado", "Fiscalización", "Ruido molesto en la noche.")
         )
     }
 
-    val casosFiltrados = listaCasosPrueba.filter { caso ->
+    val todosLosCasos = remember(reportesNuevos) {
+        reportesNuevos + listaCasosPrueba
+    }
+
+    val casosFiltrados = todosLosCasos.filter { caso ->
         val coincideTexto = caso.titulo.contains(busqueda, ignoreCase = true) || caso.sector.contains(busqueda, ignoreCase = true)
         val coincideFiltro = when (filtroSeleccionado) {
             "En revisión" -> caso.estado == "En revisión"
-            "Cerrados" -> caso.estado == "Cerrado"
+            "Cerrados" -> caso.estado == "Cerrado" || caso.estado == "En proceso"
             else -> true
         }
         coincideTexto && coincideFiltro
@@ -91,7 +101,10 @@ fun MisReportesScreen(
             ) {
                 LazyColumn(verticalArrangement = Arrangement.spacedBy(10.dp)) {
                     items(casosFiltrados) { caso ->
-                        TarjetaReporteItem(caso = caso, onClick = { onVerDetalleCaso(caso.id) })
+                        TarjetaReporteItem(
+                            caso = caso,
+                            onClick = { onVerDetalleCaso(caso.id) }
+                        )
                     }
                 }
             }
@@ -139,7 +152,12 @@ fun TarjetaReporteItem(caso: CasoReporteUI, onClick: () -> Unit) {
                 color = if (caso.estado == "En revisión") Color(0xFFFFF3E0) else Color(0xFFE8F5E9),
                 shape = RoundedCornerShape(12.dp)
             ) {
-                Text(caso.estado, color = if (caso.estado == "En revisión") Color(0xFFE65100) else Color(0xFF2E7D32), fontSize = 11.sp, modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp))
+                Text(
+                    caso.estado,
+                    color = if (caso.estado == "En revisión") Color(0xFFE65100) else Color(0xFF2E7D32),
+                    fontSize = 11.sp,
+                    modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp)
+                )
             }
         }
     }

@@ -13,7 +13,8 @@ data class Reporte(
     val ubicacion: String,
     val descripcion: String,
     val fecha: String,
-    val estado: String = "En revisión"
+    val estado: String = "En revisión",
+    val fotoUri: String? = null
 )
 
 data class NuevoReporteModel(

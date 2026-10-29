@@ -1,68 +1,68 @@
 package com.duoc.SafeMuni.viewmodel
 
 import android.net.Uri
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.duoc.SafeMuni.model.NuevoReporteModel
 import com.duoc.SafeMuni.model.Reporte
 import com.duoc.SafeMuni.repository.NuevoReporteRepository
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 class NuevoReporteViewModel(
     private val repository: NuevoReporteRepository
 ) : ViewModel() {
 
-    var uiState by mutableStateOf(NuevoReporteModel())
-        private set
+    private val _uiState = MutableStateFlow(NuevoReporteModel())
+    val uiState: StateFlow<NuevoReporteModel> = _uiState.asStateFlow()
 
-    var tempUriCamara: Uri? = null
-        private set
-
-    fun onCategoriaSelected(nuevaCategoria: String) {
-        uiState = uiState.copy(categoriaReporte = nuevaCategoria)
+    fun onCategoriaChanged(nuevaCategoria: String) {
+        _uiState.update { it.copy(categoriaReporte = nuevaCategoria) }
     }
 
-    fun onUbicacionManualChanged(nuevaUbicacion: String) {
-        uiState = uiState.copy(ubicacion = nuevaUbicacion)
+    fun onUbicacionChanged(nuevaUbicacion: String) {
+        _uiState.update { it.copy(ubicacion = nuevaUbicacion) }
     }
 
     fun onDescripcionChanged(nuevaDescripcion: String) {
-        uiState = uiState.copy(descripcion = nuevaDescripcion)
+        _uiState.update { it.copy(descripcion = nuevaDescripcion) }
     }
 
-    fun prepararUriCamara(): Uri? {
-        val uri = repository.crearUriFotoTemporal()
-        tempUriCamara = uri
-        return uri
+    fun onFotoSelected(uri: Uri?) {
+        _uiState.update { it.copy(fotoUri = uri) }
     }
 
-    fun onFotoTomadaExito() {
-        tempUriCamara?.let { uri ->
-            uiState = uiState.copy(fotoUri = uri)
-        }
-    }
+    fun registrarReporte() {
+        val estadoActual = _uiState.value
+        val fechaActual = SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault()).format(Date())
+        val folioGenerado = "SM-${System.currentTimeMillis().toString().takeLast(4)}"
 
-    fun enviarReporte() {
-        if (uiState.categoriaReporte.isBlank() || uiState.descripcion.isBlank()) return
+        val nuevoReporte = Reporte(
+            folio = folioGenerado,
+            titulo = estadoActual.categoriaReporte.ifBlank { "Reporte general" },
+            categoria = estadoActual.categoriaReporte,
+            ubicacion = estadoActual.ubicacion,
+            descripcion = estadoActual.descripcion,
+            fecha = fechaActual,
+            estado = "En revisión",
+            fotoUri = estadoActual.fotoUri?.toString()
+        )
 
         viewModelScope.launch {
-            val nuevoReporte = Reporte(
-                folio = "SM-00${(10..99).random()}",
-                titulo = uiState.categoriaReporte,
-                categoria = uiState.categoriaReporte,
-                ubicacion = if (uiState.ubicacion.isBlank()) "Sector referencial" else uiState.ubicacion,
-                descripcion = uiState.descripcion,
-                fecha = "Hoy"
-            )
             repository.guardarReporte(nuevoReporte)
-            uiState = uiState.copy(mostrarModalExito = true)
+            _uiState.update { it.copy(mostrarModalExito = true) }
         }
     }
 
-    fun cerrarModal() {
-        uiState = NuevoReporteModel()
+    fun cerrarModalExito() {
+        _uiState.update {
+            NuevoReporteModel()
+        }
     }
 }
